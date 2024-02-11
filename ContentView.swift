@@ -21,6 +21,9 @@ struct ContentView: View {
     
     @State private var alertGameOver = false
     
+    @State private var animationAmount = 0.0
+    @State private var selectedFlagButton = -1
+    
     var body: some View {
         NavigationStack{
             ZStack{
@@ -56,17 +59,29 @@ struct ContentView: View {
                         
                         ForEach(0..<3) { number in
                             Button{
-                                flagTapped(number)
+                                withAnimation{
+                                    flagTapped(number)
+//                                    selectedFlagButton = number
+                                }
+
                                 
                             } label : {
                                 FlagImage(flagImage: countries[number])
                             }
+                            .rotation3DEffect(
+                                .degrees(selectedFlagButton == number ? 360 : 0 ),
+                                axis: (x: 0.0, y: 1, z: 0.0)
+                            )
+                            .opacity(selectedFlagButton == -1 || selectedFlagButton == number ? 1.0 : 0.25)
+                            .scaleEffect(selectedFlagButton == -1 || selectedFlagButton == number ? 1 : 0.5)
                         }
+                        
                     }
                     .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
                     .padding(.vertical, 20)
                     .background(.regularMaterial)
                     .clipShape(.rect(cornerRadius: 20))
+                    
                 }
                 .padding()
             }
@@ -100,10 +115,12 @@ struct ContentView: View {
         correctAnswer = Int.random(in: 0...2)
         lives = 3
         score = 0
+        selectedFlagButton = -1
         alertGameOver = false
     }
     
     func flagTapped(_ number : Int){
+        selectedFlagButton = number
         if number == correctAnswer{
             scoreTitle = "Correct"
             if score < 8 {
@@ -136,6 +153,7 @@ struct ContentView: View {
     func askQuestion(){
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+        selectedFlagButton = -1
     }
     
 }
